@@ -69,99 +69,99 @@ class Game {
 
 	}
 	init() {
-		console.log('Initializing canvas ID: ' + this.canvasId);
-		// ------------
-		// Canvas setup
-		// ------------
-		// attach the game stage to the HTML canvas element
-		this.stage = new createjs.Stage(this.canvasId);
-
-		// --------------
-		// Settings setup
-		// --------------
-		// load settings from cookies
-		this.loadSettings();
-		// copy the settings for temporary hold when in settings menu
-		// if the player confirms, this overwrites normal settings
-		// otherwise, it is discarded
-		this.tempSettings = clone(this.settings);
-		// if -1, proceed as normal
-		// if any number from 0 to 5, we are choosing a key to configure in settings
-		this.keyConfigureState = -1;
-		
-		// ------------
-		// Ticker setup
-		// ------------
-		// ticker controls frame by frame update of the game window
-		// any objects that need to be updated should have its own update function, which will be called here
-		var ref = this;		// this allows the ticker to reference the game object
-		createjs.Ticker.framerate = 120;
-		this.measuredFPS = 0;
-		this.tick = function(event) {
-			// update FPS counter display
-			ref.measuredFPS = createjs.Ticker.getMeasuredFPS();
-			ref.level.fpsCounter.text = 'FPS: ' + Math.round(ref.measuredFPS);
-			
-			// update game logic regarding held keys
-			ref.checkHeldKeys();
-			
-			// update the stage (all graphics)
-			if (!event.paused) {
-				ref.level.updateStage(ref.timeline.getPosition());
-			}
-
-			// update the timeline
-			ref.timeline.update();
-		}
-		
-		// -----------
-		// Chart setup
-		// -----------
-		this.chartdata = this.loadChart(this.chartConfig);
-		console.log('chart data:');
-		console.log(this.chartdata);
-		this.level = new Level(this.songSrc,this.chartdata,this.width,this.height,this.settings,this);	// construct the level object
-		this.level.attachStage(this.stage);																// attach the level to the stage
-
-		// --------------
-		// Timeline setup
-		// --------------
-		this.timeline = new Timeline(this.songSrc, this.settings.globalOffset);
-		this.timeline.start = -this.level.notetrack.gap*1000 - 2000;
-		this.timeline.end = 1000*this.level.notetrack.beatToTime(this.level.notetrack.lastBeat) + 4000;
-		
-		
-		// -----------
-		// Stage setup
-		// -----------
-		// we can draw the highlights now that the timeline is set up
-		this.level.setup();
-
-		// create a main menu
-		this.initMainMenu();
-		// get the settings menu ready
-		this.initSettingsMenu();
-
-		// set up the mine checking values
-		for (var col = 0; col < this.level.notetrack.keyCount; col++) {
-			this.keysMineCheck.push({
-				'tapRegistered': false,
-				'lastHeld': -1000
-			});
-		}
-		
-		// load the sound effects
-		var result = createjs.Sound.registerSound({id:'mine', src:thisFilePath+'mine.ogg'});
-		if (result) {
-			this.mineSound = createjs.Sound.play(thisFilePath+'mine.ogg');
-		}
-		createjs.Sound.stop();
-		
 		// ----------------
 		// Final load check
 		// ----------------
 		// make sure that the song is fully loaded before creating a sound instance to the timeline
 		return new Promise((resolve, reject) => {
+			console.log('Initializing canvas ID: ' + this.canvasId);
+			// ------------
+			// Canvas setup
+			// ------------
+			// attach the game stage to the HTML canvas element
+			this.stage = new createjs.Stage(this.canvasId);
+
+			// --------------
+			// Settings setup
+			// --------------
+			// load settings from cookies
+			this.loadSettings();
+			// copy the settings for temporary hold when in settings menu
+			// if the player confirms, this overwrites normal settings
+			// otherwise, it is discarded
+			this.tempSettings = clone(this.settings);
+			// if -1, proceed as normal
+			// if any number from 0 to 5, we are choosing a key to configure in settings
+			this.keyConfigureState = -1;
+			
+			// ------------
+			// Ticker setup
+			// ------------
+			// ticker controls frame by frame update of the game window
+			// any objects that need to be updated should have its own update function, which will be called here
+			var ref = this;		// this allows the ticker to reference the game object
+			createjs.Ticker.framerate = 120;
+			this.measuredFPS = 0;
+			this.tick = function(event) {
+				// update FPS counter display
+				ref.measuredFPS = createjs.Ticker.getMeasuredFPS();
+				ref.level.fpsCounter.text = 'FPS: ' + Math.round(ref.measuredFPS);
+				
+				// update game logic regarding held keys
+				ref.checkHeldKeys();
+				
+				// update the stage (all graphics)
+				if (!event.paused) {
+					ref.level.updateStage(ref.timeline.getPosition());
+				}
+
+				// update the timeline
+				ref.timeline.update();
+			}
+			
+			// -----------
+			// Chart setup
+			// -----------
+			this.chartdata = this.loadChart(this.chartConfig);
+			console.log('chart data:');
+			console.log(this.chartdata);
+			this.level = new Level(this.songSrc,this.chartdata,this.width,this.height,this.settings,this);	// construct the level object
+			this.level.attachStage(this.stage);																// attach the level to the stage
+
+			// --------------
+			// Timeline setup
+			// --------------
+			this.timeline = new Timeline(this.songSrc, this.settings.globalOffset);
+			this.timeline.start = -this.level.notetrack.gap*1000 - 2000;
+			this.timeline.end = 1000*this.level.notetrack.beatToTime(this.level.notetrack.lastBeat) + 4000;
+			
+			
+			// -----------
+			// Stage setup
+			// -----------
+			// we can draw the highlights now that the timeline is set up
+			this.level.setup();
+
+			// create a main menu
+			this.initMainMenu();
+			// get the settings menu ready
+			this.initSettingsMenu();
+
+			// set up the mine checking values
+			for (var col = 0; col < this.level.notetrack.keyCount; col++) {
+				this.keysMineCheck.push({
+					'tapRegistered': false,
+					'lastHeld': -1000
+				});
+			}
+			
+			// load the sound effects
+			var result = createjs.Sound.registerSound({id:'mine', src:thisFilePath+'mine.ogg'});
+			if (result) {
+				this.mineSound = createjs.Sound.play(thisFilePath+'mine.ogg');
+			}
+			createjs.Sound.stop();
+
 			let listener = createjs.Sound.on("fileload", (event) => {
 				//console.log('song loaded!');
 				if (event.src == this.songSrc) {

@@ -50,41 +50,15 @@ function html5kbo(gameConfigs) {
 	// ---------------------------------
 	// Initialize all the games in order
 	// ---------------------------------
-	
-	// container for the game's init function allows it to reference itself
-	function initGame(id) {
-		return function() {
-			return games[id].init();
-		}
-	}
-	// hold the list of games
-	var games = [];
-	for (var k = 0; k < gameConfigs.length; k++) {
-		// make the games
-		games.push(new Game(gameConfigs[k]));
-	}
-	// create the promise chain
-	var gamePromise;
-	for (var k = 0; k < gameConfigs.length; k++) {
-		// init the game and queue the promise chain
-		if (gamePromise) {
-			console.log('promise index ' + k);
-			console.log(gamePromise);
-			gamePromise = gamePromise.then(initGame(k));
-		} else {
-			gamePromise = games[k].init();
-		}
-	}	
-	
-	// initialize keyboard controls for each game
-	addEventListener("keydown", function (e) {
-		for (var k = 0; k < games.length; k++) {
-			games[k].rawKeyDown(e);
-		}
-	}, false);
-	addEventListener("keyup", function (e) {
-		for (var k = 0; k < games.length; k++) {
-			games[k].rawKeyUp(e);
-		}
-	}, false);
+
+	var games = gameConfigs.map(gameConfig => new Game(gameConfig));
+
+	return Promise.all(
+		games.map(game => game.init())
+	).then(() => {
+		games.forEach(game => {
+			addEventListener("keydown", game.rawKeyDown)
+			addEventListener("keyup", game.rawKeyUp)
+		})
+	})
 }
