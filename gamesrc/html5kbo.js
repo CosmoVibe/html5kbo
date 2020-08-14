@@ -46,19 +46,16 @@ include(thisFilePath+'convertsm.js');
 // -------------
 //
 // Takes an array of objects, where each object is the configuration data for each game canvas
-function html5kbo(gameConfigs) {
+async function html5kbo(gameConfigs) {
 	// ---------------------------------
 	// Initialize all the games in order
 	// ---------------------------------
 
 	var games = gameConfigs.map(gameConfig => new Game(gameConfig));
 
-	return Promise.all(
-		games.map(game => game.init())
-	).then(() => {
-		games.forEach(game => {
-			addEventListener("keydown", game.rawKeyDown)
-			addEventListener("keyup", game.rawKeyUp)
-		})
-	})
+	for (var game of games) {
+		await game.init()
+		addEventListener("keydown", game.rawKeyDown)
+		addEventListener("keyup", game.rawKeyUp)
+	}
 }
