@@ -3,6 +3,7 @@
 // --------------------------
 
 // function for importing a script within javascript
+
 function include(file) {
 
 	var script = document.createElement('script');
@@ -13,8 +14,54 @@ function include(file) {
 	document.getElementsByTagName('head').item(0).appendChild(script);
 }
 
-// grab the current script file folder
-// not sure how reliable this part is, potentially could break
+async function initCreateJS() {
+	// load the sound effects
+	return await new Promise((resolve, reject) => {
+		var result = createjs.Sound.registerSound({id:'mine', src:thisFilePath+'mine.ogg'});
+		if (result === true) {
+			console.log("Mine SFX had already been loaded.");
+			resolve("mine.ogg");
+		} else {
+			let loadListener = createjs.Sound.on("fileload", e => {
+				if (e.id == "mine") {
+					createjs.Sound.off("fileload", loadListener);
+					resolve("mine.ogg");
+				}
+			});
+
+			let errorListener = createjs.Sound.on("fileerror", e => {
+				if (e.id == "mine") {
+					createjs.Sound.off("fileerror", errorListener);
+					reject("mine.ogg");
+				}
+			});
+		}
+	}).then(
+		src => console.log(`${src} loaded`),
+		src => console.log(`${src} couldn't be loaded`)
+	);
+}
+
+// -------------
+// Main function
+// -------------
+//
+// Takes an array of objects, where each object is the configuration data for each game canvas
+async function html5kbo(gameConfigs) {
+	// ---------------------------------
+	// Initialize all the games in order
+	// ---------------------------------
+	
+	// container for the game's init function allows it to reference itself
+	var games = gameConfigs.map(config => new Game(config));
+
+	for (game of games) {
+		await game.init();
+		addEventListener("keydown", game.rawKeyDown);
+		addEventListener("keyup", game.rawKeyUp);
+	}
+}
+
 var scripts = document.getElementsByTagName("script");
 var baseScriptName = 'html5kbo.js'
 var baseScriptIndex = -1;
@@ -31,6 +78,9 @@ if (baseScriptIndex === -1) {
 var thisFilePath = scripts[baseScriptIndex].src;
 thisFilePath = thisFilePath.substring(0,thisFilePath.length-baseScriptName.length);
 
+// grab the current script file folder
+// not sure how reliable this part is, potentially could break
+
 // include all the necessary files now
 include(thisFilePath+'game.js');
 include(thisFilePath+'notetrack.js');
@@ -40,51 +90,4 @@ include(thisFilePath+'utility.js');
 include(thisFilePath+'config.js');
 include(thisFilePath+'convertsm.js');
 
-
-// -------------
-// Main function
-// -------------
-//
-// Takes an array of objects, where each object is the configuration data for each game canvas
-function html5kbo(gameConfigs) {
-	// ---------------------------------
-	// Initialize all the games in order
-	// ---------------------------------
-	
-	// container for the game's init function allows it to reference itself
-	function initGame(id) {
-		return function() {
-			return games[id].init();
-		}
-	}
-	// hold the list of games
-	var games = [];
-	for (var k = 0; k < gameConfigs.length; k++) {
-		// make the games
-		games.push(new Game(gameConfigs[k]));
-	}
-	// create the promise chain
-	var gamePromise;
-	for (var k = 0; k < gameConfigs.length; k++) {
-		// init the game and queue the promise chain
-		if (gamePromise) {
-			console.log('promise index ' + k);
-			console.log(gamePromise);
-			gamePromise = gamePromise.then(initGame(k));
-		} else {
-			gamePromise = games[k].init();
-		}
-	}	
-	
-	// initialize keyboard controls for each game
-	addEventListener("keydown", function (e) {
-		for (var k = 0; k < games.length; k++) {
-			games[k].rawKeyDown(e);
-		}
-	}, false);
-	addEventListener("keyup", function (e) {
-		for (var k = 0; k < games.length; k++) {
-			games[k].rawKeyUp(e);
-		}
-	}, false);
-}
+initCreateJS();
