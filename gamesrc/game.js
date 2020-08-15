@@ -68,7 +68,7 @@ class Game {
 		this.songSrc = gameConfig.song;
 
 	}
-	init() {
+	async init() {
 		console.log('Initializing canvas ID: ' + this.canvasId);
 		// ------------
 		// Canvas setup
@@ -149,29 +149,39 @@ class Game {
 				'lastHeld': -1000
 			});
 		}
-		
-		// load the sound effects
-		var result = createjs.Sound.registerSound({id:'mine', src:thisFilePath+'mine.ogg'});
-		if (result) {
-			this.mineSound = createjs.Sound.play(thisFilePath+'mine.ogg');
-		}
-		createjs.Sound.stop();
-		
+
+		this.mineSound = createjs.Sound.createInstance("mine");
+
 		// ----------------
 		// Final load check
 		// ----------------
 		// make sure that the song is fully loaded before creating a sound instance to the timeline
-		return new Promise((resolve, reject) => {
-			let listener = createjs.Sound.on("fileload", (event) => {
-				//console.log('song loaded!');
-				if (event.src == this.songSrc) {
-					ref.timeline.song = createjs.Sound.createInstance(this.songSrc);
-					createjs.Sound.off("fileload", listener);
-					resolve();
-				}
-			}, this)
-			createjs.Sound.registerSound(this.songSrc, this.songSrc);
-		});
+		return await new Promise((resolve, reject) => {
+			var result = createjs.Sound.registerSound(this.songSrc);
+
+			if (result === true) {
+				//console.log(`${this.songSrc} had already been loaded.`);
+				resolve(this.songSrc);
+			} else {
+				let loadListener = createjs.Sound.on("fileload", e => {
+					if (e.src == this.songSrc) {
+						ref.timeline.song = createjs.Sound.createInstance(this.songSrc);
+						createjs.Sound.off("fileload", loadListener);
+						resolve(this.songSrc);
+					}
+				});
+
+				let errorListener = createjs.Sound.on("fileerror", e => {
+					if (e.src == this.songSrc) {
+						createjs.Sound.off("fileerror", errorListener);
+						reject(this.songSrc);
+					}
+				});
+			}
+		}).then(
+			src => console.log(`${src} loaded`),
+			src => console.log(`${src} couldn't be loaded`)
+		);
 	}
 
 	// load a chart from the chart configuration input
@@ -796,6 +806,7 @@ class Game {
 	
 	// handle input
 	rawKeyDown(e) {
+		
 		// prevent repeating keys when held down
 		if (e.repeat) {
 			return;

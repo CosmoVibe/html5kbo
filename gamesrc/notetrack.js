@@ -1,3 +1,5 @@
+var logData = false;
+
 // decides what time it is in the song
 class Timeline {
 	constructor(src, offset) {
@@ -275,8 +277,10 @@ class Notetrack {
 			}
 		}
 
-		console.log('sync timing: (time in sec, beat, syncBPM)');
-		console.log(syncTiming);		
+		if (logData) {
+			console.log('sync timing: (time in sec, beat, syncBPM)');
+			console.log(syncTiming);		
+		}
 		return syncTiming;
 	}
 	
@@ -373,8 +377,10 @@ class Notetrack {
 			}
 		}
 		
-		console.log('scroll timing: (beat, position of track, scroll speed, time)');
-		console.log(scrollTiming);
+		if (logData) {
+			console.log('scroll timing: (beat, position of track, scroll speed, time)');
+			console.log(scrollTiming);
+		}
 		return scrollTiming;
 	}
 	
@@ -502,9 +508,11 @@ class Notetrack {
 			}
 		}
 		
-		console.log('note data:')
-		console.log(notes);
-		console.log(this.mines);
+		if (logData) {
+			console.log('note data:')
+			console.log(notes);
+			console.log(this.mines);
+		}
 		return notes;
 	}
 
