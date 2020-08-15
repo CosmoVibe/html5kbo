@@ -69,11 +69,6 @@ class Game {
 
 	}
 	async init() {
-		// ----------------
-		// Final load check
-		// ----------------
-		// make sure that the song is fully loaded before creating a sound instance to the timeline
-		
 		console.log('Initializing canvas ID: ' + this.canvasId);
 		// ------------
 		// Canvas setup
@@ -154,28 +149,38 @@ class Game {
 				'lastHeld': -1000
 			});
 		}
-		
-		await new Promise(resolve => {
-			var result = createjs.Sound.registerSound({id:'mine', src:thisFilePath+'mine.ogg'});
 
-			let listener = createjs.Sound.on("fileload", e => {
-				if (e.id == "mine") {
-					createjs.Sound.off("fileload", listener);
-					resolve(result);
-				}
-			});
-		}).then(result => {
-			this.mineSound = createjs.Sound.createInstance(thisFilePath+'mine.ogg');
-		}).then(new Promise(() => {
-			createjs.Sound.registerSound(this.songSrc, this.songSrc);
-			let listener = createjs.Sound.on("fileload", e => {
-				if (e.src == this.songSrc) {
-					ref.timeline.song = createjs.Sound.createInstance(this.songSrc);
-					createjs.Sound.off("fileload", listener);
-					resolve(e.src);					
-				}
-			})
-		})).then(song => console.log(`Song ${song} has been loaded.`));
+		this.mineSound = createjs.Sound.createInstance("mine");
+
+		// ----------------
+		// Final load check
+		// ----------------
+		// make sure that the song is fully loaded before creating a sound instance to the timeline
+		return await new Promise((resolve, reject) => {
+			var result = createjs.Sound.registerSound(this.songSrc);
+
+			if (result === true) {
+				console.log(`${this.songSrc} had already been loaded.`);
+				resolve(this.songSrc);
+			} else {
+				let loadListener = createjs.Sound.on("fileload", e => {
+					if (e.src == this.songSrc) {
+						createjs.Sound.off("fileload", loadListener);
+						resolve(this.songSrc);
+					}
+				});
+
+				let errorListener = createjs.Sound.on("fileerror", e => {
+					if (e.src == this.songSrc) {
+						createjs.Sound.off("fileerror", errorListener);
+						reject(this.songSrc);
+					}
+				});
+			}
+		}).then(
+			src => console.log(`${src} loaded`),
+			src => console.log(`${src} couldn't be loaded`)
+		);
 	}
 
 	// load a chart from the chart configuration input
