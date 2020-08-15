@@ -160,11 +160,12 @@ class Game {
 			var result = createjs.Sound.registerSound(this.songSrc);
 
 			if (result === true) {
-				console.log(`${this.songSrc} had already been loaded.`);
+				//console.log(`${this.songSrc} had already been loaded.`);
 				resolve(this.songSrc);
 			} else {
 				let loadListener = createjs.Sound.on("fileload", e => {
 					if (e.src == this.songSrc) {
+						ref.timeline.song = createjs.Sound.createInstance(this.songSrc);
 						createjs.Sound.off("fileload", loadListener);
 						resolve(this.songSrc);
 					}
@@ -805,6 +806,7 @@ class Game {
 	
 	// handle input
 	rawKeyDown(e) {
+		
 		// prevent repeating keys when held down
 		if (e.repeat) {
 			return;

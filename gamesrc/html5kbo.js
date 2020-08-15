@@ -55,10 +55,16 @@ async function html5kbo(gameConfigs) {
 	// container for the game's init function allows it to reference itself
 	var games = gameConfigs.map(config => new Game(config));
 
-	for (game of games) {
-		await game.init();
-		addEventListener("keydown", game.rawKeyDown);
-		addEventListener("keyup", game.rawKeyUp);
+	for (var k = 0; k < games.length; k++) {
+		await games[k].init();
+		function getGameKeyDown(k) {
+			return function(e){games[k].rawKeyDown(e)};
+		}
+		function getGameKeyUp(k) {
+			return function(e){games[k].rawKeyUp(e)};
+		}
+		addEventListener("keydown", getGameKeyDown(k));
+		addEventListener("keyup", getGameKeyUp(k));
 	}
 }
 
