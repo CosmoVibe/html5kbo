@@ -567,12 +567,23 @@ class Level {
 			var highlightWidth = boxEndLerp - boxBeginLerp;
 			// draw the box
 			var highlightBox = new createjs.Shape();
-			highlightBox.graphics.beginFill("#ffff99");
+			var highlightColor = "#ffff99";
+			if (highlight[2]) {
+				highlightColor = highlight[2];
+			}
+			highlightBox.graphics.beginFill(highlightColor);
 			highlightBox.graphics.rect(boxBeginLerp,-10,highlightWidth,20);
 			highlightBox.alpha = 0.5;
 			this.timelineGfx.addChild(highlightBox);
 			this.stage.update();
 		}
+		
+		// add timestamp
+		this.timestampText = new createjs.Text("start/end", "12px Arial", "#ffffff")
+		this.timestampText.textAlign = 'right';
+		this.timestampText.x = 5*this.width/6;
+		this.timestampText.y = 32;
+		this.stage.addChild(this.timestampText)
 		
 		this.stage.addChild(this.timelineGfx);
 	}
@@ -769,6 +780,23 @@ class Level {
 				throw e;
 			}
 		}
+		var timeElapsedSec = +(timeElapsed/1000).toFixed(2);
+		var timeElapsedMin = Math.floor(timeElapsedSec/60);
+		timeElapsedSec = (timeElapsedSec%60).toFixed(2);
+		timeElapsedSec = ''+timeElapsedSec;
+		timeElapsedSec = timeElapsedSec.substring(0,5);
+		if (timeElapsedSec < 10) {
+			timeElapsedSec = '0'+timeElapsedSec;
+		}
+		var totalTimeSec = (totalTime/1000).toFixed(2);
+		var totalTimeMin = Math.floor(totalTimeSec/60);
+		totalTimeSec = (totalTimeSec%60).toFixed(2);
+		totalTimeSec = ''+totalTimeSec;
+		totalTimeSec = totalTimeSec.substring(0,5);
+		if (totalTimeSec < 10) {
+			totalTimeSec = '0'+totalTimeSec;
+		}
+		this.timestampText.text = ''+timeElapsedMin+':'+timeElapsedSec +' / '+totalTimeMin+':'+totalTimeSec;
 		
 		this.stage.update();
 	}
