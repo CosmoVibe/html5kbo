@@ -95,7 +95,7 @@ class Game {
 		// ticker controls frame by frame update of the game window
 		// any objects that need to be updated should have its own update function, which will be called here
 		var ref = this;		// this allows the ticker to reference the game object
-		createjs.Ticker.framerate = 120;
+		createjs.Ticker.framerate = 144;
 		this.measuredFPS = 0;
 		this.tick = function(event) {
 			// update FPS counter display
@@ -200,11 +200,17 @@ class Game {
 		// build the object
 		var chart = {};
 		chart.notes = SMchart.notes;
-		chart.gap = fullSMObject.offset;
-		chart.syncBPMList = fullSMObject.bpms;
-		chart.syncStopList = fullSMObject.stops;
+		chart.gap = fullSMObject.OFFSET;
+		chart.syncBPMList = fullSMObject.BPMS;
+		chart.syncStopList = fullSMObject.STOPS;
 		chart.scrollModList = [[0,1]];
 		chart.scrollStopList = [];
+		if (fullSMObject.XMODBPMS) {
+			chart.scrollModList = fullSMObject.XMODBPMS;
+		}
+		if (fullSMObject.XMODSTOPS) {
+			chart.scrollStopList = fullSMObject.XMODSTOPS;
+		}
 		chart.highlights = chartdata.highlights;
 		return chart;
 	}
@@ -293,19 +299,19 @@ class Game {
 		background.y = 0;
 		this.mainMenuGfx.addChild(background);
 		// add title text
-		var titleText = new createjs.Text(this.fullChartObject.name, "36px Arial", "#ffffff");
+		var titleText = new createjs.Text(this.fullChartObject.TITLE, "36px Arial", "#ffffff");
 		titleText.x = this.width/2;
 		titleText.y = 150;
 		titleText.textAlign = "center";
 		this.mainMenuGfx.addChild(titleText);
 		// add subtitle text
-		var subtitleText = new createjs.Text(this.fullChartObject.subtitle, "20px Arial", "#ffffff");
+		var subtitleText = new createjs.Text(this.fullChartObject.SUBTITLE, "20px Arial", "#ffffff");
 		subtitleText.x = this.width/2;
 		subtitleText.y = 200;
 		subtitleText.textAlign = "center";
 		this.mainMenuGfx.addChild(subtitleText);
 		// add artist text
-		var artistText = new createjs.Text(this.fullChartObject.artist, "24px Arial", "#ffffff");
+		var artistText = new createjs.Text(this.fullChartObject.ARTIST, "24px Arial", "#ffffff");
 		artistText.x = this.width/2;
 		artistText.y = 300;
 		artistText.textAlign = "center";

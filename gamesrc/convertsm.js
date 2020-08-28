@@ -27,153 +27,144 @@ function processSM(filepath) {
 
 	// split the raw data into lines
 	var raw = readTextFile(filepath);
-	var lines = raw[0].split('\n');
+	var lines = raw[0].split(';');
 	
-	props.lastUpdated = raw[1];
-	props.levels = {'4k': [], '6k': []}
+	props.lastUpdated = raw[1];													// last updated
 	
 	// file path related properties
 	var rootpath = filepath.split('/');
-	props.foldername = rootpath[rootpath.length-2];
-	props.smfile = rootpath[rootpath.length-1];
-	props.dwifile = props.smfile.substring(0,props.smfile.length-2)+'dwi';
+	props.foldername = rootpath[rootpath.length-2];								// folder name
+	props.smfile = rootpath[rootpath.length-1];									// sm file name
+	props.dwifile = props.smfile.substring(0,props.smfile.length-2)+'dwi';		// dwi file name
 	rootpath[rootpath.length-1] = '';
-	props.rootpath = rootpath.join('/');
+	props.rootpath = rootpath.join('/');										// root folder
 	
-	// bool for breaking out
-	var stopProcessing = false;
-	for (var k in lines) {
-		if (stopProcessing) break;
-		// check lines with properties
-		lines[k] = lines[k].trim();
-		if (lines[k][0] === '#' && lines[k].includes(':') ) {
-			var pv = lines[k].split(':');
-			// trim the # and ; from the beginning and end
-			pv[0] = pv[0].replace('#','').trim();
-			if (lines[k][lines[k].length-1] === ';') {
-				pv[1] = pv[1].slice(0,pv[1].length-1);
-			}
-			// take action depending on the property name
-			switch (pv[0]) {
-				case 'TITLE':
-					props['name'] = pv[1];
-					break;
-				case 'SUBTITLE':
-					props['subtitle'] = pv[1];
-					break;
-				case 'ARTIST':
-					props['artist'] = pv[1];
-					break;
-				case 'BANNER':
-					props['bn-filepath'] = pv[1];
-					break;
-				case 'BACKGROUND':
-					if (pv[1]) props['bg-filepaths'] = [pv[1]];
-					else props['bg-filepaths'] = [];
-					break;
-				case 'CDTITLE':
-					props['cdtitle-filepath'] = pv[1];
-					break;
-				case 'MUSIC':
-					props['music-filepath'] = pv[1];
-					break;
-				case 'OFFSET':
-					props['offset'] = +pv[1];
-					break;
-				case 'BPMS':
-					var bpms = pv[1].split(',');
-					for (var j = 0; j < bpms.length; j++) {
-						bpms[j] = bpms[j].split('=');
-						bpms[j][0] = +bpms[j][0];
-						bpms[j][1] = +bpms[j][1];
+	props.levels = {
+		'4k': [],
+		'6k': [],
+		'8k': []
+	};
+	
+	for (var rawline of lines) {
+		var line = rawline.trim();
+		line = line.split(':');
+		var prop = line[0].split('#');
+		prop = prop[prop.length-1];
+		var value = line.slice(1,line.length).join(':').trim();
+		
+		// get rid of blank property
+		if (!prop) {
+			continue;
+		}
+		
+		// specific properties that require more handling
+		switch (prop) {
+			case 'BPMS':
+				var bpms = [];
+				var rawbpms = value.split(',');
+				for (var rawbpm of rawbpms) {
+					var bpm = rawbpm.trim().split('=');
+					bpm[0] = +bpm[0];
+					bpm[1] = +bpm[1];
+					bpms.push(bpm);
+				}
+				props[prop] = bpms;
+				break;
+			case 'STOPS':
+				var stops = [];
+				var rawstops = value.split(',');
+				for (var rawstop of rawstops) {
+					var stop = rawstop.trim().split('=');
+					if (stop.length === 1) {
+						continue;
 					}
-					props['bpms'] = bpms;
-					break;
-				case 'STOPS':
-					if (!pv[1]) {
-						props['stops'] = [];
+					stop[0] = +stop[0];
+					stop[1] = +stop[1];
+					stops.push(stop);
+				}
+				props[prop] = stops;
+				break;
+			case 'XMODBPMS':
+				var bpms = [];
+				var rawbpms = value.split(',');
+				for (var rawbpm of rawbpms) {
+					var bpm = rawbpm.trim().split('=');
+					bpm[0] = +bpm[0];
+					bpm[1] = +bpm[1];
+					bpms.push(bpm);
+				}
+				props[prop] = bpms;
+				break;
+			case 'XMODSTOPS':
+				var stops = [];
+				var rawstops = value.split(',');
+				for (var rawstop of rawstops) {
+					var stop = rawstop.trim().split('=');
+					if (stop.length === 1) {
+						continue;
+					}
+					stop[0] = +stop[0];
+					stop[1] = +stop[1];
+					stops.push(stop);
+				}
+				props[prop] = stops;
+				break;
+			case 'NOTES':
+				var chart = {};
+				// split out the chart properties first
+				var setup = value.split(':');
+				var type = setup[0].trim();
+				// check for number of columns
+				switch (type) {
+					case 'dance-single':
+						var cols = 4;
 						break;
+					case 'dance-solo':
+						var cols = 6;
+						break;
+					case 'dance-double':
+						var cols = 8;
+						break;
+					default:
+						var cols = 6;
+						break;
+				}
+				// other properties
+				chart.level = setup[2].trim();
+				chart.diff = +(setup[3].trim());
+				// notes
+				var rawmeasures = setup[setup.length-1].split(',');
+				var measures = [];
+				for (var rawmeasure of rawmeasures) {
+					var measureraw = '';
+					// remove comments (why didn't i do this to the entire file instead of just in one spot)
+					var rawmeasurelines = rawmeasure.split('\n');
+					for (var rawmeasureline of rawmeasurelines) {
+						var comments = rawmeasureline.split('//');
+						measureraw += comments[0].trim();
 					}
-					// check if we need to keep looking at the next line for more stops
-					var checkMoreStops = false;
-					if (pv[1][pv[1].length-1] !== ';') {
-						checkMoreStops = true;
+					// split by number of columns
+					var measure = [];
+					for (var k = 0; k < measureraw.length; k+=cols) {
+						measure.push(measureraw.slice(k,k+cols));
 					}
-					var rawStr = pv[1];
-					if (checkMoreStops) {
-						k++;
-						while (lines[k].trim()[lines[k].trim().length-1] !== ';') {
-							rawStr += lines[k];
-							k++;
-						}
-						rawStr += lines[k];
-					}
-					var stops = rawStr.split(';')[0].split(',');
-					for (var j = 0; j < stops.length; j++) {
-						stops[j] = stops[j].split('=');
-						stops[j][0] = +stops[j][0];
-						stops[j][1] = +stops[j][1];
-					}
-					props['stops'] = stops;
-					break;
-				case 'BGCHANGES':
-					// if there are bgchanges, grab all the file names
-					if (pv[1]) {
-						var str = pv[1];
-						do {
-							var bgfile = str.split('=')[1];
-							if (bgfile != '-nosongbg-') {
-								props['bg-filepaths'].push(bgfile);
-							}
-							k++;
-							str = lines[k];
-						} while (lines[k].trim() !== ';');
-					}
-					// for now, just stop all processing here
-					//stopProcessing = true;
-					break;
-				case 'NOTES':
-					// figure out what difficulties and modes have charts
-					k++;
-					var type;
-					if (lines[k].includes('single')) type = '4k';
-					else if (lines[k].includes('solo')) type = '6k';
-					else console.log(props['name'] + ' has a type that is not 4k or 6k, please look into this.');
-					k += 2;
-					var level = lines[k].trim().replace(':', '');
-					k++;
-					var diff = lines[k].trim().replace(':', '');
-					k += 2;
-					// now we record the actual notes
-					var notes = [];
-					// skip bad lines
-					while (lines[k][0] === ' ') {
-						k++;
-					}
-					k--;
-					// body of notes
-					while (lines[k][0] !== ';') {
-						k++;
-						var measure = [];
-						while (lines[k][0] !== ',' && lines[k][0] !== ';') {
-							if (lines[k].trim()) {
-								measure.push(lines[k].trim());
-							}
-							k++;
-						}
-						notes.push(measure);
-					}
-					// compile the full chart object
-					var chart = {};
-					chart.level = level;
-					chart.diff = diff;
-					chart.notes = notes;
-					if (type) {
-						props.levels[type].push(chart);
-					}
-					break;
-			}
+					measures.push(measure);
+				}
+				chart.notes = measures;
+				// add it to the final object
+				var mode = ''+cols+'k';
+				props.levels[mode].push(chart);
+				break;
+			case 'OFFSET':
+			case 'SAMPLELENGTH':
+			case 'SAMPLESTART':
+				props[prop] = +value;
+				break;
+			default:
+				props[prop] = value;
+				break;
 		}
 	}
+	
 	return props;
 }
