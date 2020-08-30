@@ -27,10 +27,6 @@ function processSM(filepath) {
 
 	// get the raw data
 	var raw = readTextFile(filepath);
-<<<<<<< Updated upstream
-	var lines = raw[0].split(';');
-	
-=======
 	
 	// remove comments and split by line
 	var rawlines = raw[0].split('\n');
@@ -40,7 +36,6 @@ function processSM(filepath) {
 	var rawtext = rawlines.join('\n');
 	var lines = rawtext.split(';');
 	
->>>>>>> Stashed changes
 	props.lastUpdated = raw[1];													// last updated
 	
 	// file path related properties
