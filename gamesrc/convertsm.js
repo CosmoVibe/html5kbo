@@ -25,10 +25,22 @@ function processSM(filepath) {
 	// object that will hold all the properties
 	var props = {};
 
-	// split the raw data into lines
+	// get the raw data
 	var raw = readTextFile(filepath);
+<<<<<<< Updated upstream
 	var lines = raw[0].split(';');
 	
+=======
+	
+	// remove comments and split by line
+	var rawlines = raw[0].split('\n');
+	for (var k = 0; k < rawlines.length; k++) {
+		rawlines[k] = rawlines[k].split('//')[0].trim();
+	}
+	var rawtext = rawlines.join('\n');
+	var lines = rawtext.split(';');
+	
+>>>>>>> Stashed changes
 	props.lastUpdated = raw[1];													// last updated
 	
 	// file path related properties
@@ -137,11 +149,18 @@ function processSM(filepath) {
 				var measures = [];
 				for (var rawmeasure of rawmeasures) {
 					var measureraw = '';
+<<<<<<< Updated upstream
 					// remove comments (why didn't i do this to the entire file instead of just in one spot)
 					var rawmeasurelines = rawmeasure.split('\n');
 					for (var rawmeasureline of rawmeasurelines) {
 						var comments = rawmeasureline.split('//');
 						measureraw += comments[0].trim();
+=======
+					// concat all lines after trimming
+					var rawmeasurelines = rawmeasure.split('\n');
+					for (var rawmeasureline of rawmeasurelines) {
+						measureraw += rawmeasureline.trim();
+>>>>>>> Stashed changes
 					}
 					// split by number of columns
 					var measure = [];
