@@ -149,18 +149,10 @@ function processSM(filepath) {
 				var measures = [];
 				for (var rawmeasure of rawmeasures) {
 					var measureraw = '';
-<<<<<<< Updated upstream
-					// remove comments (why didn't i do this to the entire file instead of just in one spot)
-					var rawmeasurelines = rawmeasure.split('\n');
-					for (var rawmeasureline of rawmeasurelines) {
-						var comments = rawmeasureline.split('//');
-						measureraw += comments[0].trim();
-=======
 					// concat all lines after trimming
 					var rawmeasurelines = rawmeasure.split('\n');
 					for (var rawmeasureline of rawmeasurelines) {
 						measureraw += rawmeasureline.trim();
->>>>>>> Stashed changes
 					}
 					// split by number of columns
 					var measure = [];
