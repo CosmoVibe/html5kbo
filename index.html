@@ -24,9 +24,9 @@ function init() {
 		// embed 1
 		{
 			canvasid: "game1",								// the id of the canvas
-			song: "../ncguide/examples/songs/Penny.mp3",	// song file location
+			song: "Penny.mp3",								// song file location
 			chart: {
-				src: "../ncguide/examples/sm/Penny.sm",		// .sm file location
+				src: "Penny.sm",							// .sm file location
 				type: "4k",									// 4k or 6k
 				diff: 'Hard',								// name of the difficulty in the .sm file
 				highlights: [								// highlight sections by marking starting and ending beats
@@ -38,9 +38,9 @@ function init() {
 		// embed 2
 		{
 			canvasid: "game2",								// the id of the canvas
-			song: "../ncguide/examples/songs/Penny.mp3",	// song file location
+			song: "Penny.mp3",								// song file location
 			chart: {
-				src: "../ncguide/examples/sm/Penny.sm",		// .sm file location
+				src: "Penny.sm",							// .sm file location
 				type: "4k",									// 4k or 6k
 				diff: 'Medium',								// name of the difficulty in the .sm file
 				highlights: [								// highlight sections by marking starting and ending beats
@@ -52,9 +52,9 @@ function init() {
 		// embed 3
 		{
 			canvasid: "game3",								// the id of the canvas
-			song: "../ncguide/examples/songs/H4NDs.mp3",	// song file location
+			song: "H4NDs.mp3",								// song file location
 			chart: {
-				src: "../ncguide/examples/sm/hands.sm",		// .sm file location
+				src: "hands.sm",							// .sm file location
 				type: "6k",									// 4k or 6k
 				diff: 'Hard',								// name of the difficulty in the .sm file
 				highlights: [								// highlight sections by marking starting and ending beats
@@ -64,7 +64,7 @@ function init() {
 				],
 				chartArtist: 'CosmoVibe'					// chart artist
 			},
-			downloadURL: 'http://www.cosmovibe.com/ncguide/'// optional, download link to file
+			downloadURL: 'hands.zip'						// optional, download link to file
 		}
 	];
 	
@@ -77,7 +77,6 @@ function init() {
 Some extra things to be aware of:
 
 - Try to fully quit out of every chart on the page (go back to the main menu or settings menu) before playing a new chart to avoid weird behavior. (working on something to detect an active window)
-- The .sm conversion is not yet bug-free. Try to avoid unnecessary blank lines and comments. (will align the conversion with technical specs later)
 - Any kind of seek (clicking the timeline bar or using the key configs) will automatically play/resume the song.
 - Try not to embed too many of these into one page. After 3 or 4 windows, it will begin to lag significantly on lower performing machines.
 
