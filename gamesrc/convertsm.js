@@ -25,9 +25,16 @@ function processSM(filepath) {
 	// object that will hold all the properties
 	var props = {};
 
-	// split the raw data into lines
+	// get the raw data
 	var raw = readTextFile(filepath);
-	var lines = raw[0].split(';');
+	
+	// remove comments and split by line
+	var rawlines = raw[0].split('\n');
+	for (var k = 0; k < rawlines.length; k++) {
+		rawlines[k] = rawlines[k].split('//')[0].trim();
+	}
+	var rawtext = rawlines.join('\n');
+	var lines = rawtext.split(';');
 	
 	props.lastUpdated = raw[1];													// last updated
 	
@@ -137,11 +144,10 @@ function processSM(filepath) {
 				var measures = [];
 				for (var rawmeasure of rawmeasures) {
 					var measureraw = '';
-					// remove comments (why didn't i do this to the entire file instead of just in one spot)
+					// concat all lines after trimming
 					var rawmeasurelines = rawmeasure.split('\n');
 					for (var rawmeasureline of rawmeasurelines) {
-						var comments = rawmeasureline.split('//');
-						measureraw += comments[0].trim();
+						measureraw += rawmeasureline.trim();
 					}
 					// split by number of columns
 					var measure = [];

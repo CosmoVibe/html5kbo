@@ -219,6 +219,7 @@ class Game {
 	loadSettings() {
 		// skip if we cannot find a cookie
 		if (!document.cookie) {
+			this.saveSettings();
 			return;
 		}
 		var cookieRaw = document.cookie.split(';');
@@ -233,7 +234,7 @@ class Game {
 		this.settings.scrollSpeedFactor = this.settings.scrollSpeed/1000;
 		this.settings.globalOffset = +cookie['globalOffset'];
 		this.settings.noteskin = cookie['noteskin'];
-		this.settings.volume = cookie['volume'];
+		this.settings.volume = cookie['volume'] ?? 100;
 
 		this.settings.keyBind[0] = +cookie['keyBind0'];
 		this.settings.keyBind[1] = +cookie['keyBind1'];
