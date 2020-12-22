@@ -81,7 +81,7 @@ for (var k = 0; k < scripts.length; k++) {
 if (baseScriptIndex === -1) {
 	throw new Error('Somehow could not locate the base "'+baseScriptName+'" script.');
 }
-var thisFilePath = scripts[baseScriptIndex].src;
+var thisFilePath = scripts[baseScriptIndex].src.replace('www.','');
 thisFilePath = thisFilePath.substring(0,thisFilePath.length-baseScriptName.length);
 
 // grab the current script file folder
