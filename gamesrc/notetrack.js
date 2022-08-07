@@ -1,4 +1,4 @@
-var logData = false;
+var logData = true;
 
 // decides what time it is in the song
 class Timeline {
@@ -389,10 +389,18 @@ class Notetrack {
 	// convert a time to a position of the note track
 	timeToTrackPosition(time){
 		// first find the scroll timing entry for the beat we want
-		var i = 0;
-		while(i < this.scrollTiming.length && this.scrollTiming[i][3] <= time){
-			i++;
+		function checkRange(low, high, sT) {
+			if (low == high) return low;
+			
+			var mid = Math.trunc((high+low)/2);
+			
+			if (sT[mid][3] <= time) {
+				return checkRange(mid+1, high, sT);
+			} else {
+				return checkRange(low, mid, sT);
+			}
 		}
+		var i = checkRange(0, this.scrollTiming.length, this.scrollTiming);
 		if (i > 0) {
 			i--;
 		}
